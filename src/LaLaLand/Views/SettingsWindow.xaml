@@ -1,0 +1,760 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="LaLaLand.Views.SettingsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="LaLaLand 设置">
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid>
+        <Grid.Resources>
+            <Style x:Key="CardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="16,10" />
+                <Setter Property="MinHeight" Value="64" />
+            </Style>
+            <Style x:Key="SectionHeaderStyle" BasedOn="{StaticResource BodyStrongTextBlockStyle}" TargetType="TextBlock">
+                <Setter Property="Margin" Value="2,22,0,6" />
+            </Style>
+            <Style x:Key="RowTitleStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+            <Style x:Key="RowDescStyle" BasedOn="{StaticResource CaptionTextBlockStyle}" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+            <Style BasedOn="{StaticResource DefaultComboBoxStyle}" TargetType="ComboBox">
+                <Setter Property="MinWidth" Value="200" />
+            </Style>
+            <Style BasedOn="{StaticResource DefaultSliderStyle}" TargetType="Slider">
+                <Setter Property="Width" Value="200" />
+            </Style>
+        </Grid.Resources>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid x:Name="TitleBar" Padding="18,0,0,0">
+            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="10">
+                <Image Width="18" Height="18" Source="ms-appx:///Assets/LaLaLand-v2.png" />
+                <TextBlock VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" Text="LaLaLand 设置" />
+            </StackPanel>
+        </Grid>
+
+        <NavigationView
+            x:Name="Nav"
+            Grid.Row="1"
+            IsBackButtonVisible="Collapsed"
+            IsPaneToggleButtonVisible="False"
+            IsSettingsVisible="False"
+            OpenPaneLength="190"
+            PaneDisplayMode="Left"
+            SelectionChanged="OnNavSelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="位置与尺寸" Tag="0"><NavigationViewItem.Icon><SymbolIcon Symbol="FullScreen" /></NavigationViewItem.Icon></NavigationViewItem>
+                <NavigationViewItem Content="外观与效果" Tag="1"><NavigationViewItem.Icon><SymbolIcon Symbol="Highlight" /></NavigationViewItem.Icon></NavigationViewItem>
+                <NavigationViewItem Content="交互与行为" Tag="2"><NavigationViewItem.Icon><SymbolIcon Symbol="TouchPointer" /></NavigationViewItem.Icon></NavigationViewItem>
+                <NavigationViewItem Content="播放与音量" Tag="3"><NavigationViewItem.Icon><SymbolIcon Symbol="Play" /></NavigationViewItem.Icon></NavigationViewItem>
+                <NavigationViewItem Content="歌词" Tag="4"><NavigationViewItem.Icon><SymbolIcon Symbol="Font" /></NavigationViewItem.Icon></NavigationViewItem>
+                <NavigationViewItem Content="快捷键" Tag="5"><NavigationViewItem.Icon><SymbolIcon Symbol="Keyboard" /></NavigationViewItem.Icon></NavigationViewItem>
+                <NavigationViewItem Content="关于" Tag="6"><NavigationViewItem.Icon><SymbolIcon Symbol="Help" /></NavigationViewItem.Icon></NavigationViewItem>
+            </NavigationView.MenuItems>
+            <Grid>
+                <ScrollViewer x:Name="Page0" Padding="36,0,36,36">
+                    <StackPanel MaxWidth="820" Spacing="4">
+                <TextBlock Margin="0,8,0,10" Style="{StaticResource TitleTextBlockStyle}" Text="位置与尺寸" />
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="固定位置" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="灵动岛停靠的屏幕位置，展开方向随之自动调整" />
+                        </StackPanel>
+                        <ComboBox x:Name="PositionBox" Grid.Column="1" VerticalAlignment="Center" SelectionChanged="OnPositionChanged">
+                            <ComboBoxItem Content="顶部居中" />
+                            <ComboBoxItem Content="左上" />
+                            <ComboBoxItem Content="右上" />
+                            <ComboBoxItem Content="左下" />
+                            <ComboBoxItem Content="底部居中" />
+                            <ComboBoxItem Content="右下" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="显示器" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="多屏时选择灵动岛所在的屏幕" />
+                        </StackPanel>
+                        <ComboBox x:Name="DisplayBox" Grid.Column="1" VerticalAlignment="Center" SelectionChanged="OnDisplayChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="位置微调" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="水平 / 垂直方向与屏幕边缘的距离（居中时水平值为左右偏移）" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+                            <NumberBox x:Name="OffsetXBox" Width="110" Header="水平" Maximum="2000" Minimum="-2000" SmallChange="2" SpinButtonPlacementMode="Compact" ValueChanged="OnOffsetChanged" />
+                            <NumberBox x:Name="OffsetYBox" Width="110" Header="垂直" Maximum="2000" Minimum="-200" SmallChange="2" SpinButtonPlacementMode="Compact" ValueChanged="OnOffsetChanged" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="收起样式" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="未悬停时灵动岛显示的内容" />
+                        </StackPanel>
+                        <ComboBox x:Name="CollapsedStyleBox" Grid.Column="1" VerticalAlignment="Center" SelectionChanged="OnCollapsedStyleChanged">
+                            <ComboBoxItem Content="封面 + 单行歌词" />
+                            <ComboBoxItem Content="纯单行歌词" />
+                            <ComboBoxItem Content="封面 + 播放控制" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="宽度贴合歌词" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="收起状态随每句歌词伸缩，较长的句子提前变宽迎接；超长句子平衡折成两行，不再显示省略号" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="FitLyricsToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="收起时允许两行歌词" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="超出最大宽度的句子平衡折成两行；关闭后始终单行显示，过长部分以省略号结尾（需开启宽度贴合歌词）" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="TwoLineToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="收起宽度" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="开启贴合歌词时为最大宽度，否则为固定宽度（不超过展开宽度）" />
+                        </StackPanel>
+                        <Slider x:Name="CollapsedWidthSlider" Grid.Column="1" VerticalAlignment="Center" Maximum="600" Minimum="220" StepFrequency="10" ValueChanged="OnSliderChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="展开宽度" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="悬停卡片与歌词面板的宽度；更宽可减少长歌词换行" />
+                        </StackPanel>
+                        <Slider x:Name="ExpandedWidthSlider" Grid.Column="1" VerticalAlignment="Center" Maximum="600" Minimum="340" StepFrequency="10" ValueChanged="OnSliderChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="缩放" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="在系统 DPI 缩放基础上额外放大或缩小" />
+                        </StackPanel>
+                        <Slider x:Name="ScaleSlider" Grid.Column="1" VerticalAlignment="Center" Maximum="160" Minimum="70" StepFrequency="5" ValueChanged="OnSliderChanged" />
+                    </Grid>
+                </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+                <ScrollViewer x:Name="Page1" Padding="36,0,36,36" Visibility="Collapsed">
+                    <StackPanel MaxWidth="820" Spacing="4">
+                <TextBlock Margin="0,8,0,10" Style="{StaticResource TitleTextBlockStyle}" Text="外观与效果" />
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="材质" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="亚克力 / 毛玻璃 / 液态玻璃会实时模糊灵动岛背后的桌面与窗口；封面流光取专辑封面色彩作为背景" />
+                        </StackPanel>
+                        <ComboBox x:Name="MaterialBox" Grid.Column="1" VerticalAlignment="Center" SelectionChanged="OnMaterialChanged">
+                            <ComboBoxItem Content="亚克力" />
+                            <ComboBoxItem Content="毛玻璃" />
+                            <ComboBoxItem Content="液态玻璃" />
+                            <ComboBoxItem Content="纯色" />
+                            <ComboBoxItem Content="封面流光" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <Border x:Name="SolidColorCard" Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="纯色颜色" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="纯色材质使用的背景色" />
+                        </StackPanel>
+                        <ComboBox x:Name="SolidColorBox" Grid.Column="1" VerticalAlignment="Center" SelectionChanged="OnSolidColorChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="圆角半径" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="展开时的圆角；收起时最大为胶囊形。封面圆角自动与外框保持同心" />
+                        </StackPanel>
+                        <Slider x:Name="CornerRadiusSlider" Grid.Column="1" VerticalAlignment="Center" Maximum="48" Minimum="4" StepFrequency="1" ValueChanged="OnSliderChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="背景压暗" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="玻璃与流光材质的着色深度；数值越大越暗、文字越清晰" />
+                        </StackPanel>
+                        <Slider x:Name="DimSlider" Grid.Column="1" VerticalAlignment="Center" Maximum="85" Minimum="0" StepFrequency="5" ValueChanged="OnSliderChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="显示律动条" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="收起状态右侧的频谱条，由播放器的真实音频驱动（只采集播放器进程的声音）" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="VisualizerToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="水滴波纹" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="灵动岛像落在鼓面上的水滴：每个节拍在边缘随机一处激起细小的波纹，沿边缘传开后消散" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="DropletToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="歌词绕封面流动" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="完全展开时，封面嵌入歌词流并随节拍缩放，周围的歌词每一帧重新绕排" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="FlowToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="逐字扫光" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="当前句按每个字的时间逐字点亮，折行时准确接续到下一行行首（网易云逐字歌词最精确，其余按时长均分）" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="SweepToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                    </Grid>
+                </Border>
+
+                <!-- ============ 行为 ============ -->
+                    </StackPanel>
+                </ScrollViewer>
+                <ScrollViewer x:Name="Page2" Padding="36,0,36,36" Visibility="Collapsed">
+                    <StackPanel MaxWidth="820" Spacing="4">
+                <TextBlock Margin="0,8,0,10" Style="{StaticResource TitleTextBlockStyle}" Text="交互与行为" />
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="隐藏面板（仅保留快捷键）" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="隐藏灵动岛并停止动画、音频分析与媒体监听。播放、切歌、音量等全局快捷键继续生效；可用显示/隐藏快捷键或托盘恢复" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="HidePanelToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                    </Grid>
+                </Border>
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="悬停展开延迟" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="鼠标停留多久后展开（毫秒），避免路过时误触" />
+                        </StackPanel>
+                        <Slider x:Name="HoverDelaySlider" Grid.Column="1" VerticalAlignment="Center" Maximum="800" Minimum="0" StepFrequency="20" ValueChanged="OnSliderChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="离开收起延迟" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="鼠标移开后多久收起（毫秒）" />
+                        </StackPanel>
+                        <Slider x:Name="CollapseDelaySlider" Grid.Column="1" VerticalAlignment="Center" Maximum="2000" Minimum="0" StepFrequency="50" ValueChanged="OnSliderChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="切歌时短暂展开" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="换歌或用快捷键收藏时，灵动岛自动展开约 3 秒展示歌曲信息（默认关闭）" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="PeekToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="点击卡片展开歌词" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="在展开卡片的空白处单击，切换到带歌词的完全展开状态" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="ClickLyricsToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="无播放时隐藏" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="没有任何播放器时自动隐藏灵动岛" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="HideIdleToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="置顶守护" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="窗口切换时重新夺回最上层，确保在全屏窗口化的游戏之上可见" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="TopmostToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="独占全屏时让路" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="检测到独占全屏游戏时自动隐藏并停止抢占层级，避免游戏闪回桌面；退出后自动恢复。游戏在其他屏幕时不受影响" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="YieldFullscreenToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="游戏中的显示方式" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="窗口化全屏游戏覆盖灵动岛所在屏幕时生效。任何覆盖在游戏上的窗口都会让系统改为合成模式；「仅切歌时短暂出现」平时完全隐藏，帧率影响最小" />
+                        </StackPanel>
+                        <ComboBox x:Name="GamePresentationBox" Grid.Column="1" VerticalAlignment="Center" SelectionChanged="OnGamePresentationChanged">
+                            <ComboBoxItem Content="性能优化显示" />
+                            <ComboBoxItem Content="仅切歌时短暂出现" />
+                            <ComboBoxItem Content="游戏中隐藏" />
+                            <ComboBoxItem Content="完整效果（不优化）" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="开机自启" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="登录 Windows 后自动运行" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="StartupToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                    </Grid>
+                </Border>
+
+                <!-- ============ 播放源 ============ -->
+                    </StackPanel>
+                </ScrollViewer>
+                <ScrollViewer x:Name="Page3" Padding="36,0,36,36" Visibility="Collapsed">
+                    <StackPanel MaxWidth="820" Spacing="4">
+                <TextBlock Margin="0,8,0,10" Style="{StaticResource TitleTextBlockStyle}" Text="播放与音量" />
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="播放源" />
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="播放器" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="通过系统媒体控制 (SMTC) 读取，Spotify / 网易云 / QQ 音乐等同样可以显示" />
+                        </StackPanel>
+                        <ComboBox x:Name="SourceBox" Grid.Column="1" VerticalAlignment="Center" SelectionChanged="OnSourceChanged">
+                            <ComboBoxItem Content="优先 Apple Music" />
+                            <ComboBoxItem Content="跟随系统当前媒体" />
+                            <ComboBoxItem Content="仅 Apple Music" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <!-- ============ 音量 ============ -->
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="音量" />
+
+                <TextBlock
+                    Margin="2,0,0,6"
+                    Style="{StaticResource RowDescStyle}"
+                    Text="灵动岛的音量只作用于当前播放器，是叠加在播放器内部音量之上的乘数（最终音量 = 播放器内部音量 × 灵动岛音量），不会改变系统音量、音量合成器或游戏与语音的音量。" />
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="调节步长" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="每按一次快捷键 / 每格滚轮改变的音量（%）。在灵动岛上滚动滚轮即可调节" />
+                        </StackPanel>
+                        <Slider x:Name="VolumeStepSlider" Grid.Column="1" VerticalAlignment="Center" Maximum="20" Minimum="1" StepFrequency="1" ValueChanged="OnSliderChanged" />
+                    </Grid>
+                </Border>
+
+                <!-- ============ 歌词 ============ -->
+                    </StackPanel>
+                </ScrollViewer>
+                <ScrollViewer x:Name="Page4" Padding="36,0,36,36" Visibility="Collapsed">
+                    <StackPanel MaxWidth="820" Spacing="4">
+                <TextBlock Margin="0,8,0,10" Style="{StaticResource TitleTextBlockStyle}" Text="歌词" />
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="显示歌词" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="网易云音乐、LRCLIB、酷狗音乐多源匹配；支持本地歌词" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="LyricsToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="显示翻译" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="外文歌曲在原文下方显示中文翻译（如有）" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="TranslationToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="14">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="中文字体" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="中文、日文和韩文；缺字时由系统回退" />
+                        </StackPanel>
+                        <ComboBox
+                            x:Name="LyricChineseFontBox"
+                            Grid.Column="1"
+                            Width="240"
+                            MaxDropDownHeight="420"
+                            VerticalAlignment="Center"
+                            SelectionChanged="OnLyricFontChanged" />
+                    </Grid>
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="英文字体" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="英文字母、数字和其他非东亚字符" />
+                        </StackPanel>
+                        <ComboBox x:Name="LyricEnglishFontBox" Grid.Column="1" Width="240" MaxDropDownHeight="420"
+                            VerticalAlignment="Center" SelectionChanged="OnLyricFontChanged" />
+                    </Grid>
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="字体颜色" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="默认复用封面流光的混色；无封面时使用白色" />
+                        </StackPanel>
+                        <ComboBox x:Name="LyricColorModeBox" Grid.Column="1" Width="240" VerticalAlignment="Center" SelectionChanged="OnLyricColorModeChanged">
+                            <ComboBoxItem Content="封面混色（默认）" />
+                            <ComboBoxItem Content="自定义颜色" />
+                        </ComboBox>
+                    </Grid>
+                    <Grid x:Name="LyricCustomColorRow" ColumnSpacing="16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="自定义颜色" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="原文和译文共用，保留逐字高亮与邻行渐隐" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Width="240" HorizontalContentAlignment="Left" AutomationProperties.Name="选择歌词字体颜色">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <Border x:Name="LyricColorSwatch" Width="18" Height="18" CornerRadius="4" Background="White" />
+                                <TextBlock x:Name="LyricColorHex" Text="#FFFFFF" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <Button.Flyout>
+                                <Flyout Placement="Auto">
+                                    <StackPanel Spacing="12">
+                                        <ColorPicker x:Name="LyricColorPicker" IsAlphaEnabled="False" IsAlphaSliderVisible="False"
+                                            IsAlphaTextInputVisible="False" IsHexInputVisible="True" ColorChanged="OnLyricColorChanged" />
+                                        <Button Content="恢复白色" Click="OnResetLyricColor" />
+                                    </StackPanel>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </Grid>
+                    <Grid x:Name="LyricGradientRow" ColumnSpacing="16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="混色程度" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="0%为封面统一色，100%为完整渐变；仅封面混色生效" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Width="240" Spacing="2">
+                            <TextBlock x:Name="LyricGradientValue" HorizontalAlignment="Right" Text="100%" />
+                            <Slider x:Name="LyricGradientSlider" Width="240" Minimum="0" Maximum="100" StepFrequency="1"
+                                SmallChange="1" LargeChange="10" ValueChanged="OnLyricPaintChanged" AutomationProperties.Name="歌词混色程度"
+                                ToolTipService.ToolTip="越高，封面颜色之间的渐变越明显" />
+                        </StackPanel>
+                    </Grid>
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="字体透明度（玻璃感）" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="越高越通透；0%不透明，100%完全透明" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Width="240" Spacing="2">
+                            <TextBlock x:Name="LyricTransparencyValue" HorizontalAlignment="Right" Text="0%" />
+                            <Slider x:Name="LyricTransparencySlider" Width="240" Minimum="0" Maximum="100" StepFrequency="1"
+                                SmallChange="1" LargeChange="10" ValueChanged="OnLyricPaintChanged" AutomationProperties.Name="歌词字体透明度"
+                                ToolTipService.ToolTip="原文与译文共同生效，保留逐字高亮和邻行渐隐" />
+                        </StackPanel>
+                    </Grid>
+                    <Border Background="#18191D" CornerRadius="6" Padding="14,12">
+                        <StackPanel Spacing="5">
+                            <TextBlock x:Name="LyricFontPreview" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <TextBlock x:Name="LyricAsianPreview" FontSize="14" Opacity="0.75" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="所有歌曲的时间偏移" />
+                            <TextBlock x:Name="OffsetDesc" Style="{StaticResource RowDescStyle}" Text="全局微调（毫秒，正值提前）；单首歌曲请使用下方校准" />
+                        </StackPanel>
+                        <Slider x:Name="LyricOffsetSlider" Grid.Column="1" VerticalAlignment="Center" Maximum="2000" Minimum="-2000" StepFrequency="50" ValueChanged="OnSliderChanged" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Style="{StaticResource RowTitleStyle}" Text="当前歌曲校准与歌词管理" />
+                        <TextBlock x:Name="LyricTrackText" Style="{StaticResource RowDescStyle}" Text="开始播放歌曲后可校准" />
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="180" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource RowTitleStyle}" Text="单曲时间偏移（毫秒）" />
+                                <TextBlock Style="{StaticResource RowDescStyle}" Text="歌词滞后时增加正值，提前时减小；自动保存，仅影响当前版本" />
+                            </StackPanel>
+                            <NumberBox x:Name="SongOffsetBox" Grid.Column="1" Minimum="-30000" Maximum="30000" SmallChange="100" LargeChange="1000" SpinButtonPlacementMode="Inline" ValueChanged="OnSongCalibrationChanged" />
+                        </Grid>
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="180" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource RowTitleStyle}" Text="累计偏差校正（%）" />
+                                <TextBlock Style="{StaticResource RowDescStyle}" Text="固定偏差保持0；+1%会在播放100秒后额外提前1秒" />
+                            </StackPanel>
+                            <NumberBox x:Name="SongDriftBox" Grid.Column="1" Minimum="-10" Maximum="10" SmallChange="0.1" LargeChange="1" SpinButtonPlacementMode="Inline" ValueChanged="OnSongCalibrationChanged" />
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button x:Name="ResetCalibrationButton" Content="重置本曲校准" Click="OnResetCalibrationClick" />
+                            <Button x:Name="RefreshLyricsButton" Content="重新搜索" Click="OnRefreshLyricsClick" />
+                            <Button x:Name="ImportLyricsButton" Content="导入本地歌词" Click="OnImportLyricsClick" />
+                        </StackPanel>
+                        <Button x:Name="RemoveLocalLyricsButton" Content="移除本曲本地歌词，恢复在线匹配" Click="OnRemoveLocalLyricsClick" Visibility="Collapsed" />
+                        <TextBlock x:Name="LyricsActionStatus" Style="{StaticResource RowDescStyle}" Text="支持LRC、增强LRC、YRC和TXT；本地歌词优先，清除缓存不会删除导入文件" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RowTitleStyle}" Text="歌词缓存" />
+                            <TextBlock Style="{StaticResource RowDescStyle}" Text="清除在线缓存并重新获取，不删除本地歌词与单曲校准" />
+                        </StackPanel>
+                        <Button x:Name="ClearCacheButton" Grid.Column="1" VerticalAlignment="Center" Click="OnClearCacheClick" Content="清除缓存" />
+                    </Grid>
+                </Border>
+
+                <!-- ============ 快捷键 ============ -->
+                    </StackPanel>
+                </ScrollViewer>
+                <ScrollViewer x:Name="Page5" Padding="36,0,36,36" Visibility="Collapsed">
+                    <StackPanel MaxWidth="820" Spacing="4">
+                <TextBlock Margin="0,8,0,10" Style="{StaticResource TitleTextBlockStyle}" Text="快捷键" />
+                <TextBlock Margin="2,0,0,6" Style="{StaticResource RowDescStyle}" Text="点击按钮后按下新的组合键；Esc 取消，Backspace 清除。游戏中同样有效。" />
+                <StackPanel x:Name="HotkeyList" Spacing="4" />
+
+                <!-- ============ 关于 ============ -->
+                    </StackPanel>
+                </ScrollViewer>
+                <ScrollViewer x:Name="Page6" Padding="36,0,36,36" Visibility="Collapsed">
+                    <StackPanel MaxWidth="820" Spacing="4">
+                <TextBlock Margin="0,8,0,10" Style="{StaticResource TitleTextBlockStyle}" Text="关于" />
+                <InfoBar
+                    Title="关于全屏游戏"
+                    IsClosable="False"
+                    IsOpen="True"
+                    Message="灵动岛可以显示在「无边框窗口 / 全屏窗口化」以及受 Windows 全屏优化管理的游戏之上。真正的独占全屏 (Exclusive Fullscreen) 会绕过桌面合成，任何不注入游戏进程的覆盖层都无法显示——这是为了避免触发《无畏契约》《守望先锋》等反作弊系统而刻意不做的。请在游戏内将显示模式设为无边框窗口。"
+                    Severity="Informational" />
+                <Border Margin="0,4,0,0" Style="{StaticResource CardStyle}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Style="{StaticResource RowTitleStyle}" Text="LaLaLand" />
+                        <TextBlock x:Name="VersionText" Style="{StaticResource RowDescStyle}" />
+                    </StackPanel>
+                </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </NavigationView>
+    </Grid>
+</Window>

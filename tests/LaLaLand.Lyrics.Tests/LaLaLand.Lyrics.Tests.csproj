@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/LaLaLand/Controls/TokenLayout.cs" Link="TokenLayout.cs" />
+    <Compile Include="../../src/LaLaLand/Models/LyricFontScripts.cs" Link="LyricFontScripts.cs" />
+    <Compile Include="../../src/LaLaLand/Models/TrackInfo.cs" Link="TrackInfo.cs" />
+    <Compile Include="../../src/LaLaLand/Models/LyricCalibration.cs" Link="LyricCalibration.cs" />
+    <Compile Include="../../src/LaLaLand/Services/LyricsService*.cs" Link="%(Filename)%(Extension)" />
+    <Compile Include="../../src/LaLaLand/Services/LrcParser.cs" Link="LrcParser.cs" />
+    <Compile Include="../../src/LaLaLand/Services/YrcParser.cs" Link="YrcParser.cs" />
+  </ItemGroup>
+</Project>
