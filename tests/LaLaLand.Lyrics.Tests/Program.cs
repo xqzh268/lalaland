@@ -190,6 +190,13 @@ internal static class Program
                 var handler = new FixtureHandler(Track) { LrclibHit = false, NeteaseSongs = [Song(1, Track.Title, "Other Artist / " + Track.Artist, 180)], WordLyrics = true };
                 Check((await Service(handler).GetAsync(Track, default)).IsEmpty, "different primary singer was accepted from overlapping credits");
             }),
+            ("a featured singer in the title matches a soundtrack credited to another act", async () => {
+                var track = Track with { Title = "Fixture Song (feat. Solo Singer)", Artist = "Franchise Act" };
+                var handler = new FixtureHandler(track) { LrclibHit = false, NeteaseSongs = [Song(1, "Fixture Song", "Solo Singer", 180)], WordLyrics = true };
+                Check(!(await Service(handler).GetAsync(track, default)).IsEmpty, "featured singer in the title was not accepted as the provider artist");
+                handler = new FixtureHandler(track) { LrclibHit = false, NeteaseSongs = [Song(1, "Fixture Song", "Someone Else", 180)], WordLyrics = true };
+                Check((await Service(handler).GetAsync(track, default)).IsEmpty, "unrelated artist was accepted for a featured title");
+            }),
             ("plain exact match can be upgraded to synced search lyrics", async () => {
                 var handler = new FixtureHandler(Track) { LrclibExactPlain = true };
                 Check((await Service(handler).GetAsync(Track, default)).IsSynced, "plain exact result prevented a synced search result");

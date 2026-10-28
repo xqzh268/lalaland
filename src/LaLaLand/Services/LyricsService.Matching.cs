@@ -98,6 +98,17 @@ public sealed partial class LyricsService
                 expectedParts.Count > 1 && expectedParts.SetEquals(actualParts));
     }
 
+    [GeneratedRegex(@"(?:feat\.?|ft\.?|featuring)\s+([^)\]）】]+)", RegexOptions.IgnoreCase)]
+    private static partial Regex TitleFeatureRegex();
+
+    // Soundtrack tracks are often credited to the franchise in the player but to the singer in lyric providers.
+    private static bool FeaturedArtistMatches(string title, string actual)
+    {
+        var main = ArtistIdentity(MainArtist(actual));
+        return main.Length > 0 && TitleFeatureRegex().Matches(title).Any(m =>
+            ArtistSeparatorRegex().Split(m.Groups[1].Value).Select(ArtistIdentity).Contains(main));
+    }
+
     private static double Score(TrackInfo track, string title, string artist, string album, TimeSpan duration)
     {
         var expectedTitle = Normalize(track.Title);
@@ -109,8 +120,9 @@ public sealed partial class LyricsService
         bool knownArtist = !string.IsNullOrWhiteSpace(track.Artist);
         if (knownArtist)
         {
-            if (!ArtistMatches(track.Artist, artist)) return double.NegativeInfinity;
-            score += ArtistIdentity(track.Artist) == ArtistIdentity(artist) ? 3 : 2.6;
+            bool listed = ArtistMatches(track.Artist, artist);
+            if (!listed && !FeaturedArtistMatches(track.Title, artist)) return double.NegativeInfinity;
+            score += listed && ArtistIdentity(track.Artist) == ArtistIdentity(artist) ? 3 : 2.6;
         }
         bool knownDuration = track.Duration.TotalSeconds > 0 && duration.TotalSeconds > 0;
         if (knownDuration)
