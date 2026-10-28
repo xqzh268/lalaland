@@ -74,7 +74,8 @@ public sealed partial class LyricsService
         var results = await Task.WhenAll(
             Lookup("网易云音乐", token => FromNeteaseAsync(track, token)),
             Lookup("LRCLIB", token => FromLrclibAsync(track, token)),
-            Lookup("酷狗音乐", token => FromKugouAsync(track, token)));
+            Lookup("酷狗音乐", token => FromKugouAsync(track, token)),
+            Lookup("QQ音乐", token => FromQqMusicAsync(track, token)));
         ct.ThrowIfCancellationRequested();
         var best = results.Where(r => r.Candidate is not null).Select(r => r.Candidate!)
             .Where(c => !ToLyrics(c).IsEmpty)

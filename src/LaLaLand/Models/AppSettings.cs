@@ -42,6 +42,14 @@ public enum PlayerSource
     SystemCurrent,
     /// <summary>Only ever show Apple Music.</summary>
     AppleMusicOnly,
+    /// <summary>Only ever show a Spotify media session.</summary>
+    SpotifyOnly,
+    /// <summary>Only ever show a NetEase Cloud Music media session.</summary>
+    NeteaseOnly,
+    /// <summary>Only ever show a QQ Music media session.</summary>
+    QqMusicOnly,
+    /// <summary>Only ever show a Kugou Music media session.</summary>
+    KugouOnly,
 }
 
 public enum GamePresentation

@@ -79,7 +79,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/test-lyrics.ps1 -Live
 dotnet run --project tests/LaLaLand.Lyrics.Tests/LaLaLand.Lyrics.Tests.csproj -c Release -- --live-feedback
 ```
 
-`-Live`检查《烟花易冷》的多源匹配与酷狗下载，`--live-feedback`检查代码内指定的五首歌曲，默认使用独立临时缓存。只输出匹配元数据，不输出歌词正文。不要追加`--warm-cache`做隔离验证：该参数会改用真实用户歌词缓存。
+`-Live`检查《烟花易冷》的多源匹配，`--live-kugou`和`--live-qq`分别隔离验证酷狗与QQ音乐，`--live-feedback`检查代码内指定的五首歌曲，默认使用独立临时缓存。只输出匹配元数据，不输出歌词正文。不要追加`--warm-cache`做隔离验证：该参数会改用真实用户歌词缓存。
 
 在线来源可能受网络、限流、曲库或接口变化影响，失败应与离线回归结果分开报告。联网成功只证明当时取得了匹配数据，不能证明与实际声音同步。
 

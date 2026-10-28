@@ -17,17 +17,20 @@ public sealed partial class LyricsService
     private static string NestedText(JsonElement element, string property, string child) =>
         element.ValueKind == JsonValueKind.Object && element.TryGetProperty(property, out var value) ? Text(value, child) : "";
 
-    private async Task<JsonDocument?> GetJsonAsync(string url, CancellationToken ct)
+    private async Task<JsonDocument?> GetJsonAsync(string url, CancellationToken ct, Uri? referrer = null)
     {
-        using var response = await _http.GetAsync(url, ct);
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        if (referrer is not null)
+            request.Headers.Referrer = referrer;
+        using var response = await _http.SendAsync(request, ct);
         if (response.StatusCode == HttpStatusCode.NotFound) return null;
         response.EnsureSuccessStatusCode();
         return JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));
     }
 
-    private async Task<JsonDocument?> QueryJsonAsync(string url, List<Exception> failures, CancellationToken ct)
+    private async Task<JsonDocument?> QueryJsonAsync(string url, List<Exception> failures, CancellationToken ct, Uri? referrer = null)
     {
-        try { return await GetJsonAsync(url, ct); }
+        try { return await GetJsonAsync(url, ct, referrer); }
         catch (Exception ex) when (ex is HttpRequestException or JsonException)
         {
             failures.Add(ex);
@@ -192,5 +195,92 @@ public sealed partial class LyricsService
         }
         ReportUnavailable(failures);
         return null;
+    }
+
+    private static readonly Uri QqMusicReferrer = new("https://y.qq.com/portal/player.html");
+
+    /// <summary>
+    /// QQ音乐的搜索接口返回 songmid，歌词接口要求带 y.qq.com Referer。
+    /// 这里仅读取公开的歌词元数据，不需要 QQ 登录态或播放接口凭据。
+    /// </summary>
+    private async Task<Candidate?> FromQqMusicAsync(TrackInfo track, CancellationToken ct)
+    {
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var failures = new List<Exception>();
+        var queries = new[]
+        {
+            track.Title + " " + MainArtist(track.Artist),
+            SearchTitle(track.Title) + " " + MainArtist(track.Artist),
+            SearchTitle(track.Title),
+        }.Distinct(StringComparer.Ordinal);
+
+        foreach (var query in queries)
+        {
+            var url = "https://c.y.qq.com/soso/fcgi-bin/client_search_cp?new_json=1&format=json&w=" +
+                Uri.EscapeDataString(query.Trim()) + "&p=1&n=20";
+            using var search = await QueryJsonAsync(url, failures, ct, QqMusicReferrer);
+            if (search is null || !search.RootElement.TryGetProperty("data", out var data) ||
+                !data.TryGetProperty("song", out var song) ||
+                !song.TryGetProperty("list", out var list) || list.ValueKind != JsonValueKind.Array)
+                continue;
+
+            var candidates = list.EnumerateArray().Select(item =>
+            {
+                var title = Text(item, "name");
+                var artist = item.TryGetProperty("singer", out var singers) && singers.ValueKind == JsonValueKind.Array
+                    ? string.Join(" / ", singers.EnumerateArray().Select(s => Text(s, "name"))) : "";
+                var album = NestedText(item, "album", "name");
+                var duration = TimeSpan.FromSeconds(Math.Max(0, Number(item, "interval")));
+                var id = Text(item, "mid");
+                if (id.Length == 0) id = Text(item, "songmid");
+                return new Candidate("QQ音乐", null, null, null,
+                    Score(track, title, artist, album, duration), title, artist, duration, id);
+            }).Where(c => double.IsFinite(c.Score) && c.Id.Length > 0 && seen.Add(c.Id))
+                .OrderByDescending(c => c.Score).Take(3).ToList();
+
+            foreach (var candidate in candidates)
+            {
+                var lyrics = await QqMusicLyricsAsync(candidate, ct, failures);
+                if (lyrics is not null && !ToLyrics(lyrics).IsEmpty)
+                    return lyrics;
+            }
+        }
+
+        ReportUnavailable(failures);
+        return null;
+    }
+
+    private async Task<Candidate?> QqMusicLyricsAsync(Candidate candidate, CancellationToken ct, List<Exception> failures)
+    {
+        var url = "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?songmid=" +
+            Uri.EscapeDataString(candidate.Id) + "&format=json&nobase64=1&inCharset=utf8&outCharset=utf-8";
+        using var document = await QueryJsonAsync(url, failures, ct, QqMusicReferrer);
+        if (document is null) return null;
+        var root = document.RootElement;
+        if (Number(root, "retcode") != 0 || Number(root, "code") != 0)
+            return null;
+
+        var lrc = DecodeQqField(Text(root, "lyric"));
+        var translation = DecodeQqField(Text(root, "trans"));
+        if (string.IsNullOrWhiteSpace(lrc)) return null;
+        if (LrcParser.Parse(lrc, translation, "QQ音乐").IsEmpty) return null;
+        return candidate with { Lrc = lrc, Translation = translation };
+    }
+
+    private static string DecodeQqField(string value)
+    {
+        if (value.Contains('[', StringComparison.Ordinal)) return value;
+        var decoded = TryDecodeBase64(value);
+        return decoded?.Contains('[', StringComparison.Ordinal) == true ? decoded : value;
+    }
+
+    private static string? TryDecodeBase64(string value)
+    {
+        try
+        {
+            var bytes = Convert.FromBase64String(value.Trim());
+            return Encoding.UTF8.GetString(bytes);
+        }
+        catch (FormatException) { return null; }
     }
 }

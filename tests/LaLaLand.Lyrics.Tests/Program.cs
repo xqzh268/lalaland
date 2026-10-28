@@ -16,8 +16,8 @@ internal static class Program
     private static async Task<int> Main(string[] args)
     {
         if (args.Contains("--live-feedback")) return await LiveFeedbackAsync(args.Contains("--warm-cache"));
-        if (args.Contains("--live") || args.Contains("--live-kugou") || args.Contains("--live-someday"))
-            return await LiveAsync(args.Contains("--live-kugou"), args.Contains("--live-someday"));
+        if (args.Contains("--live") || args.Contains("--live-kugou") || args.Contains("--live-qq") || args.Contains("--live-someday"))
+            return await LiveAsync(args.Contains("--live-kugou"), args.Contains("--live-qq"), args.Contains("--live-someday"));
         var tests = new (string Name, Func<Task> Run)[]
         {
             ("offset tag anywhere shifts the whole song", () => Sync(() => {
@@ -73,6 +73,11 @@ internal static class Program
                 var handler = new FixtureHandler(Track) { LrclibHit = false, KugouHit = true };
                 var lyrics = await Service(handler).GetAsync(Track, default);
                 Check(lyrics.Source == "酷狗音乐" && lyrics.IsSynced, "third-provider fallback failed");
+            }),
+            ("QQ Music supplies a matching recording when other providers miss", async () => {
+                var handler = new FixtureHandler(Track) { LrclibHit = false, QqMusicHit = true };
+                var lyrics = await Service(handler).GetAsync(Track, default);
+                Check(lyrics.Source == "QQ音乐" && lyrics.IsSynced, "QQ Music provider fallback failed");
             }),
             ("an exact endpoint response still verifies the artist", async () => {
                 var handler = new FixtureHandler(Track with { Artist = "Wrong Singer" });
@@ -278,13 +283,15 @@ internal static class Program
         return failed == 0 ? 0 : 1;
     }
 
-    private static async Task<int> LiveAsync(bool kugouOnly, bool someday = false)
+    private static async Task<int> LiveAsync(bool kugouOnly, bool qqOnly, bool someday = false)
     {
         var track = someday ? new TrackInfo("Someday or One Day (電視劇《想見你》片頭曲)", "孫盛希", "電視劇《想見你》原聲帶", TimeSpan.FromSeconds(251), "live-check")
             : kugouOnly ? new TrackInfo("Hello", "Adele", "25", TimeSpan.FromSeconds(295), "live-check")
             : new TrackInfo("烟花易冷", "周杰伦", "跨时代", TimeSpan.FromSeconds(263.235918), "live-check");
         var directory = Path.Combine(TestDirectory, "live");
-        using var client = kugouOnly ? new HttpClient(new ProviderOnlyHandler("lyrics.kugou.com")) : new HttpClient();
+        using var client = kugouOnly
+            ? new HttpClient(new ProviderOnlyHandler("lyrics.kugou.com"))
+            : qqOnly ? new HttpClient(new ProviderOnlyHandler("c.y.qq.com")) : new HttpClient();
         var service = new LyricsService(client, directory);
         var lyrics = await service.GetAsync(track, default);
         Console.WriteLine(JsonSerializer.Serialize(new {
@@ -319,7 +326,7 @@ internal static class Program
     {
         public TrackInfo Track = track;
         public object[] NeteaseSongs = [];
-        public bool WordLyrics, EmptyFirst, Failing, KugouHit, InvalidYrc;
+        public bool WordLyrics, EmptyFirst, Failing, KugouHit, QqMusicHit, InvalidYrc;
         public bool LrclibHit = true;
         public bool LrclibExactPlain, FailLrclibSearch, FailLrclibExact;
         public int FailLrclibRequestsRemaining;
@@ -360,6 +367,12 @@ internal static class Program
             }
             else if (url.Contains("kugou.com/download"))
                 body = new { status = 200, content = Convert.ToBase64String(Encoding.UTF8.GetBytes(Lrc)) };
+            else if (url.Contains("c.y.qq.com/soso"))
+                body = new { code = 0, data = new { song = new { list = QqMusicHit
+                    ? new object[] { new { mid = "qq-fixture", name = Track.Title, singer = new[] { new { name = Track.Artist } }, album = new { name = Track.Album }, interval = Track.Duration.TotalSeconds } }
+                    : Array.Empty<object>() } } };
+            else if (url.Contains("c.y.qq.com/lyric"))
+                body = new { retcode = 0, code = 0, lyric = Lrc, trans = "" };
             else body = new { status = 200, candidates = KugouHit ? new object[] { new { id = "1", song = Track.Title, singer = Track.Artist, duration = Track.Duration.TotalMilliseconds, accesskey = "fixture" } } : Array.Empty<object>() };
             return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json") };
         }

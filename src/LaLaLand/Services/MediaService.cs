@@ -222,18 +222,48 @@ public sealed partial class MediaService : IDisposable
     private GlobalSystemMediaTransportControlsSession? PickSession(GlobalSystemMediaTransportControlsSessionManager manager)
     {
         var sessions = manager.GetSessions();
-        var apple = sessions.FirstOrDefault(s => s.SourceAppUserModelId.Contains("AppleMusic", StringComparison.OrdinalIgnoreCase));
+        var apple = sessions.FirstOrDefault(s => IsPlatform(s, PlayerSource.AppleMusicOnly));
         var current = manager.GetCurrentSession() ?? sessions.FirstOrDefault();
 
         return _settings.Current.Source switch
         {
             PlayerSource.AppleMusicOnly => apple,
+            PlayerSource.SpotifyOnly => PickPlatformSession(sessions, PlayerSource.SpotifyOnly),
+            PlayerSource.NeteaseOnly => PickPlatformSession(sessions, PlayerSource.NeteaseOnly),
+            PlayerSource.QqMusicOnly => PickPlatformSession(sessions, PlayerSource.QqMusicOnly),
+            PlayerSource.KugouOnly => PickPlatformSession(sessions, PlayerSource.KugouOnly),
             PlayerSource.SystemCurrent => current,
             _ when apple is not null && IsSessionPlaying(apple) => apple,
             _ when current is not null && IsSessionPlaying(current) => current,
             _ => apple ?? current,
         };
     }
+
+    private static GlobalSystemMediaTransportControlsSession? PickPlatformSession(
+        IReadOnlyList<GlobalSystemMediaTransportControlsSession> sessions, PlayerSource source) =>
+        sessions.FirstOrDefault(s => IsPlatform(s, source) && IsSessionPlaying(s)) ??
+        sessions.FirstOrDefault(s => IsPlatform(s, source));
+
+    /// <summary>
+    /// SMTC exposes package AUMIDs for Store apps and process names for desktop apps.
+    /// Keep matching on stable vendor tokens so desktop and Store editions share one setting.
+    /// </summary>
+    private static bool IsPlatform(GlobalSystemMediaTransportControlsSession session, PlayerSource source)
+    {
+        var id = session.SourceAppUserModelId;
+        return source switch
+        {
+            PlayerSource.AppleMusicOnly => ContainsAny(id, "applemusic", "apple.music"),
+            PlayerSource.SpotifyOnly => ContainsAny(id, "spotify"),
+            PlayerSource.NeteaseOnly => ContainsAny(id, "netease", "cloudmusic", "163music", "music.163"),
+            PlayerSource.QqMusicOnly => ContainsAny(id, "qqmusic", "qq.music", "tencentmusic", "tencent.qqmusic"),
+            PlayerSource.KugouOnly => ContainsAny(id, "kugou", "酷狗"),
+            _ => false,
+        };
+    }
+
+    private static bool ContainsAny(string value, params string[] tokens) =>
+        tokens.Any(token => value.Contains(token, StringComparison.OrdinalIgnoreCase));
 
     private static bool IsSessionPlaying(GlobalSystemMediaTransportControlsSession session) =>
         session.GetPlaybackInfo()?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;

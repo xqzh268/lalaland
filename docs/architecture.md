@@ -31,7 +31,7 @@
 `LyricsService`由获取与缓存、来源适配、匹配规则三个分部组成：
 
 - [LyricsService.cs](../src/LaLaLand/Services/LyricsService.cs)：本地优先、缓存、并发协调、取消与重试、导入。
-- [LyricsService.Providers.cs](../src/LaLaLand/Services/LyricsService.Providers.cs)：网易云音乐、LRCLIB、酷狗搜索与下载。
+- [LyricsService.Providers.cs](../src/LaLaLand/Services/LyricsService.Providers.cs)：网易云音乐、QQ音乐、LRCLIB、酷狗搜索与下载。Spotify官方 Web API 需要授权，本项目不保存账户令牌，Spotify播放时使用通用歌词源匹配。
 - [LyricsService.Matching.cs](../src/LaLaLand/Services/LyricsService.Matching.cs)：标题、歌手、版本、时长与元数据规范化。
 
 每个来源共享8秒预算；单次HTTP默认超时7秒。连接异常、无效JSON、HTTP 408/429/5xx最多延迟350毫秒重试一次；明确无匹配和永久错误不重试。请求取消会结束获取，失败或无匹配不持久化为空歌词。
