@@ -17,6 +17,8 @@ $releases = "output/velopack/releases"
 dotnet publish $project -c Release -p:Platform=x64 -r win-x64 --self-contained false -o $publish
 if ($LASTEXITCODE) { throw 'publish failed' }
 
+# Start clean: stale packages of this version would make vpk refuse to pack.
+if (Test-Path $releases) { Remove-Item $releases -Recurse -Force }
 New-Item -ItemType Directory -Path $releases -Force | Out-Null
 # Fetch previous packages so vpk can generate delta updates (ignored when there is no earlier release).
 vpk download github --repoUrl $repo --outputDir $releases 2>&1 | Out-Host
@@ -29,7 +31,8 @@ vpk @pack
 if ($LASTEXITCODE) { throw 'vpk pack failed' }
 
 if ($Upload) {
-    vpk upload github --repoUrl $repo --outputDir $releases --publish --releaseName "LaLaLand v$version" --tag "v$version"
+    $token = if ($env:GITHUB_TOKEN) { $env:GITHUB_TOKEN } else { (gh auth token) }
+    vpk upload github --repoUrl $repo --token $token --outputDir $releases --publish --releaseName "LaLaLand v$version" --tag "v$version" --targetCommitish main
     if ($LASTEXITCODE) { throw 'vpk upload failed' }
 }
 Get-ChildItem $releases | Format-Table Name, Length
