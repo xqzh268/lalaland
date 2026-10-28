@@ -197,6 +197,12 @@ internal static class Program
                 handler = new FixtureHandler(track) { LrclibHit = false, NeteaseSongs = [Song(1, "Fixture Song", "Someone Else", 180)], WordLyrics = true };
                 Check((await Service(handler).GetAsync(track, default)).IsEmpty, "unrelated artist was accepted for a featured title");
             }),
+            ("a translated recording beats an equal one that only differs by album", async () => {
+                var deluxe = new { id = 1, name = Track.Title, artists = new[] { new { name = Track.Artist } }, album = new { name = Track.Album + " (Deluxe Version)" }, duration = Track.Duration.TotalSeconds * 1000 };
+                var handler = new FixtureHandler(Track) { LrclibHit = false, QqMusicHit = true, NeteaseSongs = [deluxe], NeteaseTranslation = true };
+                var lyrics = await Service(handler).GetAsync(Track, default);
+                Check(lyrics.Lines.Count > 0 && lyrics.Lines[0].Translation == "翻译", "a provider with a translation lost to one without");
+            }),
             ("plain exact match can be upgraded to synced search lyrics", async () => {
                 var handler = new FixtureHandler(Track) { LrclibExactPlain = true };
                 Check((await Service(handler).GetAsync(Track, default)).IsSynced, "plain exact result prevented a synced search result");
@@ -333,7 +339,7 @@ internal static class Program
     {
         public TrackInfo Track = track;
         public object[] NeteaseSongs = [];
-        public bool WordLyrics, EmptyFirst, Failing, KugouHit, QqMusicHit, InvalidYrc;
+        public bool WordLyrics, EmptyFirst, Failing, KugouHit, QqMusicHit, InvalidYrc, NeteaseTranslation;
         public bool LrclibHit = true;
         public bool LrclibExactPlain, FailLrclibSearch, FailLrclibExact;
         public int FailLrclibRequestsRemaining;
@@ -365,7 +371,7 @@ internal static class Program
             else if (url.Contains("music.163.com") && url.Contains("lyric"))
             {
                 bool empty = EmptyFirst && (request.Method == HttpMethod.Post ? ++_lyricCalls == 1 : url.Contains("id=1&"));
-                body = new { lrc = new { lyric = empty ? "" : Lrc }, yrc = new { lyric = InvalidYrc ? "[10000,2000]" : !empty && WordLyrics ? "[10000,2000](10000,2000,0)word fixture" : "" } };
+                body = new { lrc = new { lyric = empty ? "" : Lrc }, tlyric = new { lyric = NeteaseTranslation ? "[00:10.00]翻译" : "" }, yrc = new { lyric = InvalidYrc ? "[10000,2000]" : !empty && WordLyrics ? "[10000,2000](10000,2000,0)word fixture" : "" } };
             }
             else if (url.Contains("lrclib.net"))
             {

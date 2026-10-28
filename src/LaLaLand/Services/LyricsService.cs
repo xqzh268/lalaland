@@ -11,7 +11,7 @@ public sealed partial class LyricsService
 {
     private readonly HttpClient _http;
     private readonly string _cacheDir;
-    private const int CacheVersion = 3;
+    private const int CacheVersion = 4;
     private sealed record CacheEntry(string Source, string? Lrc, string? Translation, string? Yrc,
         double Score, string Title, string Artist, double Duration, string Id, int Version = CacheVersion);
     private sealed record Candidate(string Source, string? Lrc, string? Translation, string? Yrc,
@@ -104,7 +104,11 @@ public sealed partial class LyricsService
     private static double Quality(Candidate candidate)
     {
         var parsed = ToLyrics(candidate);
-        return parsed.HasWordTiming ? 0.35 : parsed.IsSynced ? 0.2 : 0;
+        double timing = parsed.HasWordTiming ? 0.35 : parsed.IsSynced ? 0.2 : 0;
+        // A translated recording is worth more than a matching album name, which only separates reissues of one recording.
+        bool translated = parsed.Lines.Count > 0 &&
+            parsed.Lines.Count(l => !string.IsNullOrWhiteSpace(l.Translation)) >= Math.Max(1, parsed.Lines.Count / 3);
+        return timing + (translated ? 1.1 : 0);
     }
 
     private static Lyrics ToLyrics(Candidate candidate)
