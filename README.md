@@ -41,6 +41,10 @@ dotnet publish src/LaLaLand/LaLaLand.csproj -c Release -p:Platform=x64 -r win-x6
 & ./publish/LaLaLand-win-x64/LaLaLand.exe
 ```
 
+### 安装与自动更新
+
+正式发布使用[Velopack](https://velopack.io)，Release页面提供两种包：`LaLaLandApp-win-Portable.zip`（推荐）解压到任意位置（例如D盘）即可运行；`LaLaLandApp-win-Setup.exe`安装到`%LOCALAPPDATA%`，需要换位置时可用`Setup.exe --installto <目录>`。两种包都在设置→关于中检查、下载并安装新版本，也可开启后台自动检查，更新**直接覆盖软件当前所在目录**，不会迁移到C盘。维护者用`tools/package-release.ps1`生成安装包与更新包，详见[开发与发布](docs/development.md)。
+
 默认发布包含Windows App SDK，**仍需要目标电脑安装.NET 8 Runtime**（.NET 8 Desktop Runtime也可满足）。分发时保留整个目录，不能只复制EXE。生成含.NET运行时的目录及ARM64构建方法见[开发与发布](docs/development.md)。
 
 ### 默认快捷键

@@ -23,7 +23,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <SatelliteResourceLanguages>en;zh-Hans</SatelliteResourceLanguages>
-    <Version>0.2.3</Version>
+    <Version>0.3.0</Version>
     <Product>LaLaLand</Product>
     <!-- Keep the footprint small: server GC off, tiered PGO on -->
     <ServerGarbageCollector>false</ServerGarbageCollector>
@@ -37,6 +37,7 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260921001" />
     <PackageReference Include="Interop.UIAutomationClient" Version="10.19041.0" />
     <PackageReference Include="Microsoft.Graphics.Win2D" Version="1.4.0" />
+    <PackageReference Include="Velopack" Version="1.2.161" />
   </ItemGroup>
 
   <ItemGroup>

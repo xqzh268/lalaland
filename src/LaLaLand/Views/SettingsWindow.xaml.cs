@@ -51,6 +51,7 @@ public sealed partial class SettingsWindow : Window
         VersionText.Text = $"版本 {typeof(App).Assembly.GetName().Version?.ToString(3)} · 轻量、置顶的音乐灵动岛";
         BuildHotkeyRows();
         Load();
+        InitUpdates();
         InitLyricAppearance();
         InitLyricsManagement();
 
@@ -128,6 +129,7 @@ public sealed partial class SettingsWindow : Window
         GamePresentationBox.SelectedIndex = (int)s.GamePresentation;
         VolumeStepSlider.Value = Math.Round(s.VolumeStep * 100);
         StartupToggle.IsOn = StartupService.IsEnabled;
+        AutoUpdateToggle.IsOn = s.AutoCheckUpdates;
 
         SourceBox.SelectedIndex = (int)s.Source;
 
@@ -272,6 +274,7 @@ public sealed partial class SettingsWindow : Window
             else if (toggle == PeekToggle) s.PeekOnTrackChange = PeekToggle.IsOn;
             else if (toggle == ClickLyricsToggle) s.ClickToShowLyrics = ClickLyricsToggle.IsOn;
             else if (toggle == HideIdleToggle) s.HideWhenIdle = HideIdleToggle.IsOn;
+            else if (toggle == AutoUpdateToggle) s.AutoCheckUpdates = AutoUpdateToggle.IsOn;
             else if (toggle == HidePanelToggle) s.IsIslandVisible = !HidePanelToggle.IsOn;
             else if (toggle == TopmostToggle) s.TopmostGuard = TopmostToggle.IsOn;
             else if (toggle == YieldFullscreenToggle) s.YieldToExclusiveFullscreen = YieldFullscreenToggle.IsOn;

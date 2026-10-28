@@ -148,6 +148,9 @@ public sealed class AppSettings
     /// <summary>False destroys the panel and suspends monitoring; media hotkeys query the player on demand.</summary>
     public bool IsIslandVisible { get; set; } = true;
 
+    /// <summary>Check GitHub Releases for a newer version in the background (installed copies only).</summary>
+    public bool AutoCheckUpdates { get; set; } = true;
+
     // Source
     public PlayerSource Source { get; set; } = PlayerSource.PreferAppleMusic;
 

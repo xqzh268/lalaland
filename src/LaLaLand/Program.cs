@@ -16,6 +16,8 @@ public static class Program
     [STAThread]
     private static int Main(string[] args)
     {
+        // Installer/updater hooks (--veloapp-*) run and exit here; a normal start continues.
+        Velopack.VelopackApp.Build().Run();
         if (args.Length == 2 && args[0] == WatchdogArgument && int.TryParse(args[1], out int pid))
             return Watchdog.Run(pid);
 

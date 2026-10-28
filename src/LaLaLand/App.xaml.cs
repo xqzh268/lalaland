@@ -28,6 +28,7 @@ public partial class App : Application
     public static LyricsService Lyrics { get; private set; } = null!;
     public static AppleMusicAutomation AppleMusic { get; private set; } = null!;
     public static FavoriteService Favorites { get; private set; } = null!;
+    public static UpdateService Updates { get; private set; } = null!;
     public static VolumeService Volume { get; private set; } = null!;
     public static HotkeyService Hotkeys { get; private set; } = null!;
     public static MemoryTrimmer? Trimmer { get; private set; }
@@ -99,6 +100,7 @@ public partial class App : Application
         Settings = new SettingsService(_dispatcher);
         AppleMusic = new AppleMusicAutomation();
         Favorites = new FavoriteService(AppleMusic);
+        Updates = new UpdateService();
         Media = new MediaService(_dispatcher, Settings, AppleMusic);
         Lyrics = new LyricsService();
 #if DEBUG
@@ -132,6 +134,7 @@ public partial class App : Application
             Log.Error("Media session manager unavailable", ex);
         }
 
+        Updates.StartBackgroundChecks(() => Settings.Current.AutoCheckUpdates);
         Trimmer = new MemoryTrimmer(_dispatcher);
         Trimmer.Schedule(TimeSpan.FromSeconds(8));
         Log.Info("Started");
@@ -315,13 +318,16 @@ public partial class App : Application
             ]),
             TrayIcon.MenuItem.Separator,
             new("设置…", OpenSettings),
+            new(Updates.AvailableVersion is { } version ? $"发现新版本 {version}…" : "检查更新…", () => OpenSettings(about: true)),
             new("开机自启", () => StartupService.SetEnabled(!StartupService.IsEnabled), Checked: StartupService.IsEnabled),
             TrayIcon.MenuItem.Separator,
             new("退出", Quit),
         ];
     }
 
-    public void OpenSettings()
+    public void OpenSettings() => OpenSettings(about: false);
+
+    public void OpenSettings(bool about)
     {
         try
         {
@@ -332,6 +338,7 @@ public partial class App : Application
             }
             _settingsWindow.Activate();
             _settingsWindow.BringToFront();
+            if (about) _settingsWindow.ShowAbout();
         }
         catch (Exception ex)
         {
@@ -339,6 +346,9 @@ public partial class App : Application
             Log.Error(ex.ToString());
         }
     }
+
+    /// <summary>Normal shutdown path, also used when an installed update takes over.</summary>
+    public static void QuitForUpdate() => ((App)Current).Quit();
 
     private void Quit()
     {

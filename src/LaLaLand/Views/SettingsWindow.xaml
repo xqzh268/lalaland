@@ -756,6 +756,38 @@
                         <TextBlock x:Name="VersionText" Style="{StaticResource RowDescStyle}" />
                     </StackPanel>
                 </Border>
+                <Border Margin="0,4,0,0" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource RowTitleStyle}" Text="软件更新" />
+                                <TextBlock x:Name="UpdateStatusText" Style="{StaticResource RowDescStyle}" Text="尚未检查更新" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Button x:Name="CheckUpdateButton" Content="检查更新" Click="OnCheckUpdate" />
+                                <Button x:Name="InstallUpdateButton" Content="下载并更新" Click="OnInstallUpdate" Style="{StaticResource AccentButtonStyle}" Visibility="Collapsed" />
+                            </StackPanel>
+                        </Grid>
+                        <ProgressBar x:Name="UpdateProgress" Maximum="100" Visibility="Collapsed" />
+                        <TextBlock x:Name="UpdateNotesText" Style="{StaticResource RowDescStyle}" TextWrapping="Wrap" Visibility="Collapsed" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource RowTitleStyle}" Text="自动检查更新" />
+                                <TextBlock Style="{StaticResource RowDescStyle}" Text="启动后及每隔约 12 小时在后台检查 GitHub 发布；更新直接覆盖当前所在目录" />
+                            </StackPanel>
+                            <ToggleSwitch x:Name="AutoUpdateToggle" Grid.Column="1" MinWidth="0" VerticalAlignment="Center" Toggled="OnToggleChanged" />
+                        </Grid>
+                        <HyperlinkButton Content="查看所有发布" NavigateUri="https://github.com/xqzh268/lalaland/releases" Padding="0" />
+                    </StackPanel>
+                </Border>
                     </StackPanel>
                 </ScrollViewer>
             </Grid>

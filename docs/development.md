@@ -94,6 +94,18 @@ dotnet publish src/LaLaLand/LaLaLand.csproj -c Release -p:Platform=ARM64 -r win-
 
 发布验收先检查目录完整性，再在目标环境实际启动、退出、读取媒体和操作设置。编译成功不等于运行验收。升级前从托盘退出正式实例，备份旧发布目录和用户配置，再替换完整发布目录，避免新旧DLL与PRI混用。
 
+### 安装包与自动更新（Velopack）
+
+应用在`Program.Main`最先调用`VelopackApp.Build().Run()`，`UpdateService`通过GitHub Releases检查更新；环境变量`LALALAND_UPDATE_SOURCE`可指向本地HTTP目录用于测试。设置→关于提供检查、下载与重启安装，`AutoCheckUpdates`控制后台检查（启动后30秒，之后每12小时）。便携zip（解压到任意目录）与Setup.exe安装版都能原地自更新，覆盖软件当前所在目录；开发版仅提示。
+
+维护者一次性安装CLI：`dotnet tool install -g vpk`。发布流程：
+
+1. 更新`LaLaLand.csproj`的`<Version>`（语义化版本），提交并打`vX.Y.Z`标签。
+2. 运行`./tools/package-release.ps1`生成`output/velopack/releases/`（Setup.exe、完整包、增量包、`releases.win.json`），脚本会先下载上一版以生成增量包。
+3. 加`-Upload`直接发布到GitHub Release（需要`gh auth login`或`GITHUB_TOKEN`）；推荐分发`LaLaLandApp-win-Portable.zip`，用户解压到任意位置运行，更新原地覆盖；`Setup.exe`默认装到`%LOCALAPPDATA%\LaLaLandApp`（可用`--installto`改目录），与保存导入歌词的用户数据目录`%LOCALAPPDATA%\LaLaLand`分开，卸载不会删除用户数据。
+
+没有代码签名证书时用户首次运行可能遇到SmartScreen提示。
+
 ## 调试工具
 
 | 工具 | 用途 |
