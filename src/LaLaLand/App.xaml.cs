@@ -27,6 +27,7 @@ public partial class App : Application
     public static MediaService Media { get; private set; } = null!;
     public static LyricsService Lyrics { get; private set; } = null!;
     public static AppleMusicAutomation AppleMusic { get; private set; } = null!;
+    public static FavoriteService Favorites { get; private set; } = null!;
     public static VolumeService Volume { get; private set; } = null!;
     public static HotkeyService Hotkeys { get; private set; } = null!;
     public static MemoryTrimmer? Trimmer { get; private set; }
@@ -97,6 +98,7 @@ public partial class App : Application
 
         Settings = new SettingsService(_dispatcher);
         AppleMusic = new AppleMusicAutomation();
+        Favorites = new FavoriteService(AppleMusic);
         Media = new MediaService(_dispatcher, Settings, AppleMusic);
         Lyrics = new LyricsService();
 #if DEBUG
@@ -236,8 +238,8 @@ public partial class App : Application
     private static async Task ToggleHiddenFavoriteAsync()
     {
         var source = await Media.GetControlSourceAppIdAsync();
-        if (source?.Contains("AppleMusic", StringComparison.OrdinalIgnoreCase) == true)
-            await AppleMusic.ToggleFavoriteAsync();
+        if (FavoriteService.Supports(source))
+            await Favorites.ToggleAsync(source);
     }
 
     private static async Task ChangeHiddenVolumeAsync(float delta)

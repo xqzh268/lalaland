@@ -23,7 +23,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <SatelliteResourceLanguages>en;zh-Hans</SatelliteResourceLanguages>
-    <Version>0.2.1</Version>
+    <Version>0.2.2</Version>
     <Product>LaLaLand</Product>
     <!-- Keep the footprint small: server GC off, tiered PGO on -->
     <ServerGarbageCollector>false</ServerGarbageCollector>

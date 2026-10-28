@@ -26,7 +26,7 @@
 
 ## 收藏操作失败
 
-收藏只对Apple Music实现。先确认当前播放源是Apple Music，并使播放器窗口可见。应用界面更新、语言、收藏按钮状态或UI Automation定位失败都可能影响功能。
+收藏通过UI Automation点击播放器自己的喜欢/收藏按钮，支持Apple Music、Spotify、网易云音乐、QQ音乐、酷狗音乐。第三方播放器的按钮按名称、帮助文本、位置（底部播放栏）和大小综合评分匹配；窗口隐藏到托盘时会短暂显示再收回，网页界面尚未生成可读取树时会自动重试，找到按钮但没有可调用的操作时会改用一次真实点击。仍然失败时，`%APPDATA%\LaLaLand\log.txt`会记录"Favourite button not found; bottom-bar buttons: …"及底部栏实际暴露的按钮名称，可据此调整匹配词。
 
 开发排查可运行`tools/dump-uia.ps1`检查当前Apple Music UI树，再核对`Services/AppleMusicAutomation.cs`。分享UI树前检查个人信息。
 

@@ -324,9 +324,10 @@ public sealed partial class IslandWindow
         SourceText.Text = SourceLabel();
 
         _isFavorite = null;
-        FavoriteButton.Visibility = track?.IsAppleMusic == true ? Visibility.Visible : Visibility.Collapsed;
+        bool canFavorite = FavoriteService.Supports(track?.SourceAppId);
+        FavoriteButton.Visibility = canFavorite ? Visibility.Visible : Visibility.Collapsed;
         UpdateFavoriteGlyph(pop: false);
-        if (track?.IsAppleMusic == true)
+        if (track is not null && canFavorite)
             _ = RefreshFavoriteAsync(track);
 
         LoadLyrics(track);
@@ -901,8 +902,9 @@ public sealed partial class IslandWindow
         string player =
             app.Contains("AppleMusic", StringComparison.OrdinalIgnoreCase) ? "Apple Music" :
             app.Contains("Spotify", StringComparison.OrdinalIgnoreCase) ? "Spotify" :
-            app.Contains("cloudmusic", StringComparison.OrdinalIgnoreCase) ? "网易云音乐" :
+            app.Contains("cloudmusic", StringComparison.OrdinalIgnoreCase) || app.Contains("netease", StringComparison.OrdinalIgnoreCase) ? "网易云音乐" :
             app.Contains("QQMusic", StringComparison.OrdinalIgnoreCase) ? "QQ音乐" :
+            app.Contains("kugou", StringComparison.OrdinalIgnoreCase) ? "酷狗音乐" :
             app.Contains("chrome", StringComparison.OrdinalIgnoreCase) ? "Chrome" :
             app.Contains("msedge", StringComparison.OrdinalIgnoreCase) ? "Edge" :
             app.Length > 0 ? Path.GetFileNameWithoutExtension(app.Split('!')[0].Split('_')[0]) : "";
@@ -916,10 +918,10 @@ public sealed partial class IslandWindow
 
     private async Task RefreshFavoriteAsync(TrackInfo track)
     {
-        await Task.Delay(800); // let Apple Music update its own UI for the new track first
+        await Task.Delay(800); // let the player update its own UI for the new track first
         if (_allowClose || _media.Track?.Key != track.Key)
             return;
-        var state = await _appleMusic.GetFavoriteStateAsync();
+        var state = await App.Favorites.GetStateAsync(track.SourceAppId);
         if (_allowClose || _media.Track?.Key != track.Key || state is null)
             return;
         _isFavorite = state;
@@ -928,16 +930,16 @@ public sealed partial class IslandWindow
 
     public async Task ToggleFavoriteAsync()
     {
-        if (_media.Track?.IsAppleMusic != true)
+        if (_media.Track is not { } current || !FavoriteService.Supports(current.SourceAppId))
             return;
 
-        var result = await _appleMusic.ToggleFavoriteAsync();
+        var result = await App.Favorites.ToggleAsync(current.SourceAppId);
         if (_allowClose)
             return;
         switch (result)
         {
             case AppleMusicAutomation.ToggleResult.Failed:
-                Log.Info("Favourite button not found in Apple Music");
+                Log.Info("Favourite button not found in " + SourceLabel());
                 return;
             case AppleMusicAutomation.ToggleResult.NowFavorite:
                 _isFavorite = true;
